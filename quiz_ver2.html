@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>難易度付きクイズ</title>
+<style>
+body { font-family: sans-serif; text-align: center; padding: 30px; }
+button { margin: 10px; padding: 10px 20px; font-size: 18px; }
+#question { font-size: 24px; margin-bottom: 10px; }
+#difficulty { font-size: 18px; color: #888; margin-bottom: 20px; }
+#result, #score { font-size: 20px; margin-top: 30px; }
+.explanation { font-size: 16px; margin-top: 10px; color: #555; }
+#nextBtn { display: none; margin-top: 20px; }
+#history { text-align: left; margin: 40px auto; max-width: 600px; background: #f9f9f9; padding: 20px; border-radius: 8px; }
+#history h3 { margin-top: 0; }
+ul { text-align: left; }
+</style>
+</head>
+<body>
+
+<div id="quiz-container">
+<div id="question"></div>
+<div id="difficulty"></div>
+<div id="choices"></div>
+<div id="result"></div>
+<button id="nextBtn" onclick="nextQuestion()">次の問題へ</button>
+</div>
+<div id="score" style="display:none;"></div>
+<div id="history"></div>
+
+<script>
+const quizData = [
+{
+question: "国民皆年金の説明として次の記述は正しいか?「20歳以上60歳未満のすべての国民が加入対象となる年金制度。」",
+choices: ["〇(正)", "×(誤り)"],
+answer: "〇(正)",
+explanation: "正しい記述です。日本に住む20〜60歳の全員が対象。",
+difficulty: "レベルA"
+},
+{
+question: "第1号被保険者とは会社員や公務員のことを指す。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "×(誤り)",
+explanation: "会社員・公務員は第2号。第1号は自営業者・学生など。",
+difficulty: "レベルA"
+},
+{
+question: "第3号被保険者は厚生年金加入者の扶養配偶者。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "〇(正)",
+explanation: "20〜60歳未満の扶養配偶者が対象。",
+difficulty: "レベルA"
+},
+{
+question: "老齢基礎年金は70歳から支給される。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "×(誤り)",
+explanation: "原則65歳支給。70歳は繰下げ上限。",
+difficulty: "レベルA"
+},
+{
+question: "障害基礎年金には1級・2級がある。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "〇(正)",
+explanation: "3級は障害厚生年金の等級。",
+difficulty: "レベルA"
+},
+{
+question: "障害基礎年金3級が存在する。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "×(誤り)",
+explanation: "障害基礎年金は1級・2級のみ。",
+difficulty: "レベルA"
+},
+{
+question: "遺族基礎年金は子がいない配偶者にも支給される。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "×(誤り)",
+explanation: "支給対象は「子のある配偶者」または「子」のみ。",
+difficulty: "レベルA"
+},
+{
+question: "学生納付特例制度は保険料の免除制度である。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "×(誤り)",
+explanation: "猶予制度。後から追納できる。",
+difficulty: "レベルB"
+},
+{
+question: "死亡一時金は、すでに遺族基礎年金を受け取っている場合も支給される。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "×(誤り)",
+explanation: "重複支給不可。どちらか一方のみ。",
+difficulty: "レベルB"
+},
+{
+question: "寡婦年金は全ての未亡人が受給できる。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "×(誤り)",
+explanation: "支給には要件あり（保険料納付期間・婚姻年数など）。",
+difficulty: "レベルB"
+},
+{
+question: "基礎年金番号はすべての年金加入者に付与される。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "〇(正)",
+explanation: "年金管理のために一人ひとつ割り当てられる番号。",
+difficulty: "レベルB"
+},
+{
+question: "合算対象期間は年金額に反映される。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "×(誤り)",
+explanation: "受給資格には含まれるが、年金額には反映されない。",
+difficulty: "レベルB"
+},
+{
+question: "学生納付特例制度を使うと将来の年金額は増える。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "×(誤り)",
+explanation: "保険料未納と同じ扱いになる。追納しないと反映されない。",
+difficulty: "レベルB"
+},
+{
+question: "任意加入被保険者は70歳まで加入できる。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "×(誤り)",
+explanation: "上限は65歳（特例で例外あり）。",
+difficulty: "レベルC"
+},
+{
+question: "付加保険料は月500円である。",
+choices: ["〇(正)", "×(誤り)"],
+answer: "×(誤り)",
+explanation: "月200円が正解。",
+difficulty: "レベルB"
+},
+{
+question: "「第1号被保険者」に該当する人は?",
+choices: ["①. 厚生年金の加入者", "②. 20歳未満の学生", "③. 自営業の60歳", "④. 第2号の配偶者", "⑤. 海外在住者"],
+answer: "③. 自営業の60歳",
+explanation: "第1号は自営業や学生など。会社員は第2号。",
+difficulty: "レベルA"
+},
+{
+question: "「第2号被保険者」に正しく該当するのは?",
+choices: ["①. 公務員", "②. 自営業者", "③. 専業主婦", "④. 海外居住の日本人", "⑤. 学生"],
+answer: "①. 公務員",
+explanation: "厚生年金加入者は第2号に分類される。",
+difficulty: "レベルA"
+},
+{
+question: "「第3号被保険者」の条件に合致するのは?",
+choices: ["①. 会社経営者", "②. 年収150万円のパート主婦", "③. 会社員に扶養される配偶者", "④. 学生", "⑤. 海外の配偶者"],
+answer: "③. 会社員に扶養される配偶者",
+explanation: "第2号に扶養されている配偶者が該当。",
+difficulty: "レベルA"
+},
+{
+question: "「老齢基礎年金」の支給開始年齢は?",
+choices: ["①. 60歳", "②. 63歳", "③. 65歳", "④. 67歳", "⑤. 70歳"],
+answer: "③. 65歳",
+explanation: "原則65歳支給開始。",
+difficulty: "レベルA"
+},
+{
+question: "学生納付特例制度の説明として正しいのは?",
+choices: ["①. 納付義務が完全免除", "②. 障害年金の受給資格に反映されない", "③. 猶予であり追納できる", "④. 60歳以上も対象", "⑤. 給付付き制度"],
+answer: "③. 猶予であり追納できる",
+explanation: "学生納付特例は猶予制度。障害年金にも反映される。",
+difficulty: "レベルB"
+},
+{
+question: "「死亡一時金」が支給されるケースは?",
+choices: ["①. 第②号被保険者死亡時", "②. 遺族基礎年金と併給時", "③. 年金未加入者死亡時", "④. 遺族基礎年金等を受けられない遺族", "⑤. 誰でも受け取れる"],
+answer: "④. 遺族基礎年金等を受けられない遺族",
+explanation: "他の年金が受給できない遺族に限って支給される。",
+difficulty: "レベルB"
+},
+{
+question: "「寡婦年金」を受け取ることができる条件は?",
+choices: ["①. 5年以上婚姻継続", "②. 子がいる", "③. 被保険者が70歳以上", "④. 一時金を受け取った配偶者", "⑤. 離婚後の元配偶者"],
+answer: "①. 5年以上婚姻継続",
+explanation: "婚姻継続5年以上などの条件を満たす必要がある。",
+difficulty: "レベルB"
+},
+{
+question: "「合算対象期間」に該当するものは?",
+choices: ["①. 年金額に反映される期間", "②. 未納期間", "③. 国民年金の任意加入期間", "④. 受給資格には反映されるが年金額に含まれない期間", "⑤. 支給停止期間"],
+answer: "④. 受給資格には反映されるが年金額に含まれない期間",
+explanation: "合算対象期間は年金額に反映されず、資格期間にのみ算入される。",
+difficulty: "レベルB"
+},
+{
+question: "「障害基礎年金」の支給対象に該当するのは?",
+choices: ["①. 3級の障害者", "②. 2級の障害者", "③. 4級の障害者", "④. 就業不能な全員", "⑤. 一定の療養中の人"],
+answer: "②. 2級の障害者",
+explanation: "支給されるのは1級・2級の障害者。3級は対象外。",
+difficulty: "レベルB"
+}
+];
+
+let currentQuestion = 0;
+let score = 0;
+let mistakeLog = [];
+let answered = false;
+
+function showQuestion() {
+const q = quizData[currentQuestion];
+document.getElementById("question").textContent = q.question;
+document.getElementById("difficulty").textContent = `難易度：${q.difficulty}`;
+const choicesDiv = document.getElementById("choices");
+choicesDiv.innerHTML = "";
+
+q.choices.forEach(choice => {
+const btn = document.createElement("button");
+btn.textContent = choice;
+btn.onclick = () => checkAnswer(choice);
+btn.disabled = false;
+choicesDiv.appendChild(btn);
+});
+
+document.getElementById("result").textContent = "";
+document.getElementById("nextBtn").style.display = "none";
+answered = false;
+}
+
+function checkAnswer(userAnswer) {
+if (answered) return;
+answered = true;
+
+const q = quizData[currentQuestion];
+const resultDiv = document.getElementById("result");
+resultDiv.innerHTML = "";
+
+if (userAnswer === q.answer) {
+resultDiv.innerHTML = `<span style="color:green;">正解！</span>`;
+score++;
+} else {
+resultDiv.innerHTML = `<span style="color:red;">不正解… 正解は「${q.answer}」</span>`;
+mistakeLog.push({
+question: q.question,
+selected: userAnswer,
+correct: q.answer,
+difficulty: q.difficulty
+});
+}
+
+const explanationDiv = document.createElement("div");
+explanationDiv.className = "explanation";
+explanationDiv.innerHTML = `
+難易度：${q.difficulty}<br>
+解説：${q.explanation}
+`;
+resultDiv.appendChild(explanationDiv);
+
+document.getElementById("nextBtn").style.display = "inline-block";
+Array.from(document.getElementById("choices").children).forEach(btn => btn.disabled = true);
+}
+
+function nextQuestion() {
+currentQuestion++;
+if (currentQuestion < quizData.length) {
+showQuestion();
+} else {
+showScore();
+}
+}
+
+function showScore() {
+document.getElementById("quiz-container").style.display = "none";
+const scoreDiv = document.getElementById("score");
+scoreDiv.style.display = "block";
+scoreDiv.innerHTML = `あなたの点数は ${score} / ${quizData.length} 点です！`;
+
+const history = JSON.parse(localStorage.getItem("quizHistory") || "[]");
+const today = new Date().toLocaleDateString();
+history.push({
+date: today,
+score: `${score}/${quizData.length}`,
+mistakes: mistakeLog
+});
+localStorage.setItem("quizHistory", JSON.stringify(history));
+
+showHistory();
+}
+
+function showHistory() {
+const historyData = JSON.parse(localStorage.getItem("quizHistory") || "[]");
+const historyDiv = document.getElementById("history");
+
+if (historyData.length === 0) return;
+
+historyDiv.innerHTML = "<h3>過去のスコア履歴</h3>";
+historyData.slice(-5).reverse().forEach((record) => {
+const div = document.createElement("div");
+div.innerHTML = `<strong>${record.date}：</strong>${record.score}`;
+
+if (record.mistakes.length > 0) {
+const ul = document.createElement("ul");
+record.mistakes.forEach(m => {
+const li = document.createElement("li");
+li.innerHTML = `
+<strong>Q:</strong> ${m.question}<br>
+難易度: ${m.difficulty}<br>
+あなたの答え: <em>${m.selected}</em><br>
+正解: <strong>${m.correct}</strong>
+`;
+ul.appendChild(li);
+});
+div.appendChild(ul);
+} else {
+div.innerHTML += "<p>全問正解🎉</p>";
+}
+
+historyDiv.appendChild(div);
+});
+}
+
+showQuestion();
+</script>
+</body>
+</html>
