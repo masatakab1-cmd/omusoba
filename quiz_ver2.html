@@ -1,33 +1,69 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>難易度付きクイズ</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>福祉系クイズ</title>
 <style>
-body { font-family: sans-serif; text-align: center; padding: 30px; }
-button { margin: 10px; padding: 10px 20px; font-size: 18px; }
-#question { font-size: 24px; margin-bottom: 10px; }
-#difficulty { font-size: 18px; color: #888; margin-bottom: 20px; }
-#result, #score { font-size: 20px; margin-top: 30px; }
-.explanation { font-size: 16px; margin-top: 10px; color: #555; }
-#nextBtn { display: none; margin-top: 20px; }
-#history { text-align: left; margin: 40px auto; max-width: 600px; background: #f9f9f9; padding: 20px; border-radius: 8px; }
-#history h3 { margin-top: 0; }
-ul { text-align: left; }
+body {
+font-family: sans-serif;
+padding: 20px;
+max-width: 600px;
+margin: auto;
+}
+.question {
+font-size: 1.2em;
+margin-bottom: 10px;
+}
+.choice {
+display: block;
+margin: 8px 0;
+padding: 12px;
+background-color: #f0f0f0;
+border: 1px solid #ccc;
+width: 100%;
+text-align: left;
+font-size: 1em;
+cursor: pointer;
+border-radius: 5px;
+}
+.choice:hover {
+background-color: #e0e0e0;
+}
+.explanation {
+margin-top: 10px;
+font-size: 0.95em;
+background: #eef;
+padding: 10px;
+border-radius: 5px;
+}
+.next-btn {
+margin-top: 20px;
+display: none;
+}
+.difficulty {
+font-size: 0.9em;
+color: gray;
+margin-bottom: 10px;
+}
+@media screen and (max-width: 480px) {
+.choice {
+font-size: 0.95em;
+}
+}
 </style>
 </head>
 <body>
 
-<div id="quiz-container">
-<div id="question"></div>
-<div id="difficulty"></div>
+<h1>福祉系クイズ</h1>
+<div id="quiz">
+<div class="difficulty" id="difficulty"></div>
+<div class="question" id="question"></div>
 <div id="choices"></div>
-<div id="result"></div>
-<button id="nextBtn" onclick="nextQuestion()">次の問題へ</button>
+<div class="explanation" id="explanation"></div>
+<button id="nextButton" class="next-btn">次の問題へ</button>
 </div>
-<div id="score" style="display:none;"></div>
-<div id="history"></div>
+<div id="result" style="display:none;"></div>
 
 <script>
 const quizData = [
@@ -138,77 +174,143 @@ difficulty: "レベルB"
 },
 {
 question: "「第1号被保険者」に該当する人は?",
-choices: ["①. 厚生年金の加入者", "②. 20歳未満の学生", "③. 自営業の60歳", "④. 第2号の配偶者", "⑤. 海外在住者"],
+choices: [
+"①. 厚生年金の加入者",
+"②. 20歳未満の学生",
+"③. 自営業の60歳",
+"④. 第2号の配偶者",
+"⑤. 海外在住者"
+],
 answer: "③. 自営業の60歳",
 explanation: "第1号は自営業や学生など。会社員は第2号。",
 difficulty: "レベルA"
 },
 {
 question: "「第2号被保険者」に正しく該当するのは?",
-choices: ["①. 公務員", "②. 自営業者", "③. 専業主婦", "④. 海外居住の日本人", "⑤. 学生"],
+choices: [
+"①. 公務員",
+"②. 自営業者",
+"③. 専業主婦",
+"④. 海外居住の日本人",
+"⑤. 学生"
+],
 answer: "①. 公務員",
 explanation: "厚生年金加入者は第2号に分類される。",
 difficulty: "レベルA"
 },
 {
 question: "「第3号被保険者」の条件に合致するのは?",
-choices: ["①. 会社経営者", "②. 年収150万円のパート主婦", "③. 会社員に扶養される配偶者", "④. 学生", "⑤. 海外の配偶者"],
+choices: [
+"①. 会社経営者",
+"②. 年収150万円のパート主婦",
+"③. 会社員に扶養される配偶者",
+"④. 学生",
+"⑤. 海外の配偶者"
+],
 answer: "③. 会社員に扶養される配偶者",
 explanation: "第2号に扶養されている配偶者が該当。",
 difficulty: "レベルA"
 },
 {
 question: "「老齢基礎年金」の支給開始年齢は?",
-choices: ["①. 60歳", "②. 63歳", "③. 65歳", "④. 67歳", "⑤. 70歳"],
+choices: [
+"①. 60歳",
+"②. 63歳",
+"③. 65歳",
+"④. 67歳",
+"⑤. 70歳"
+],
 answer: "③. 65歳",
 explanation: "原則65歳支給開始。",
 difficulty: "レベルA"
 },
 {
 question: "学生納付特例制度の説明として正しいのは?",
-choices: ["①. 納付義務が完全免除", "②. 障害年金の受給資格に反映されない", "③. 猶予であり追納できる", "④. 60歳以上も対象", "⑤. 給付付き制度"],
+choices: [
+"①. 納付義務が完全免除",
+"②. 障害年金の受給資格に反映されない",
+"③. 猶予であり追納できる",
+"④. 60歳以上も対象",
+"⑤. 給付付き制度"
+],
 answer: "③. 猶予であり追納できる",
 explanation: "学生納付特例は猶予制度。障害年金にも反映される。",
 difficulty: "レベルB"
 },
 {
 question: "「死亡一時金」が支給されるケースは?",
-choices: ["①. 第②号被保険者死亡時", "②. 遺族基礎年金と併給時", "③. 年金未加入者死亡時", "④. 遺族基礎年金等を受けられない遺族", "⑤. 誰でも受け取れる"],
+choices: [
+"①. 第②号被保険者死亡時",
+"②. 遺族基礎年金と併給時",
+"③. 年金未加入者死亡時",
+"④. 遺族基礎年金等を受けられない遺族",
+"⑤. 誰でも受け取れる"
+],
 answer: "④. 遺族基礎年金等を受けられない遺族",
 explanation: "他の年金が受給できない遺族に限って支給される。",
 difficulty: "レベルB"
 },
 {
 question: "「寡婦年金」を受け取ることができる条件は?",
-choices: ["①. 5年以上婚姻継続", "②. 子がいる", "③. 被保険者が70歳以上", "④. 一時金を受け取った配偶者", "⑤. 離婚後の元配偶者"],
+choices: [
+"①. 5年以上婚姻継続",
+"②. 子がいる",
+"③. 被保険者が70歳以上",
+"④. 一時金を受け取った配偶者",
+"⑤. 離婚後の元配偶者"
+],
 answer: "①. 5年以上婚姻継続",
 explanation: "婚姻継続5年以上などの条件を満たす必要がある。",
 difficulty: "レベルB"
 },
 {
 question: "「合算対象期間」に該当するものは?",
-choices: ["①. 年金額に反映される期間", "②. 未納期間", "③. 国民年金の任意加入期間", "④. 受給資格には反映されるが年金額に含まれない期間", "⑤. 支給停止期間"],
+choices: [
+"①. 年金額に反映される期間",
+"②. 未納期間",
+"③. 国民年金の任意加入期間",
+"④. 受給資格には反映されるが年金額に含まれない期間",
+"⑤. 支給停止期間"
+],
 answer: "④. 受給資格には反映されるが年金額に含まれない期間",
 explanation: "合算対象期間は年金額に反映されず、資格期間にのみ算入される。",
 difficulty: "レベルB"
 },
 {
 question: "「障害基礎年金」の支給対象に該当するのは?",
-choices: ["①. 3級の障害者", "②. 2級の障害者", "③. 4級の障害者", "④. 就業不能な全員", "⑤. 一定の療養中の人"],
+choices: [
+"①. 3級の障害者",
+"②. 2級の障害者",
+"③. 4級の障害者",
+"④. 就業不能な全員",
+"⑤. 一定の療養中の人"
+],
 answer: "②. 2級の障害者",
 explanation: "支給されるのは1級・2級の障害者。3級は対象外。",
 difficulty: "レベルB"
 },
 {
 question: "「障害基礎年金1級」に該当するのは？",
-choices: ["①. 常時介護を要する程度の障害者", "②. 軽度の視力障害", "③. 精神疾患で通院中の者", "④. 3級の障害認定者", "⑤. 医師により経過観察中の人"],
+choices: [
+"①. 常時介護を要する程度の障害者",
+"②. 軽度の視力障害",
+"③. 精神疾患で通院中の者",
+"④. 3級の障害認定者",
+"⑤. 医師により経過観察中の人"
+],
 answer: "①. 常時介護を要する程度の障害者",
 explanation: "1級は、常に介護を必要とするような重度の障害が対象です。",
 difficulty: "レベルA"
 },
 {
 question: "「基礎年金番号」が付与されるのは？",
-choices: ["①. 第1号被保険者のみ", "②. 第2号被保険者のみ", "③. 第3号被保険者のみ", "④. 年金制度加入者すべて", "⑤. 厚生年金受給者のみ"],
+choices: [
+"①. 第1号被保険者のみ",
+"②. 第2号被保険者のみ",
+"③. 第3号被保険者のみ",
+"④. 年金制度加入者すべて",
+"⑤. 厚生年金受給者のみ"
+],
 answer: "④. 年金制度加入者すべて",
 explanation: "年金制度に加入しているすべての人に個別の基礎年金番号が割り振られます。",
 difficulty: "レベルA"
@@ -250,14 +352,26 @@ difficulty: "レベルC"
 },
 {
 question: "「学生納付特例制度」の対象となるのは？",
-choices: ["①. 高校生", "②. 大学生で20歳以上", "③. 65歳以上の学生", "④. 夜間高校生", "⑤. 留学生"],
+choices: [
+"①. 高校生",
+"②. 大学生で20歳以上",
+"③. 65歳以上の学生",
+"④. 夜間高校生",
+"⑤. 留学生"
+],
 answer: "②. 大学生で20歳以上",
 explanation: "20歳以上の大学生・専門学生等が対象です。",
 difficulty: "レベルB"
 },
 {
 question: "「老齢基礎年金」の受給資格期間は？",
-choices: ["①. 5年", "②. 10年", "③. 15年", "④. 20年", "⑤. 25年"],
+choices: [
+"①. 5年",
+"②. 10年",
+"③. 15年",
+"④. 20年",
+"⑤. 25年"
+],
 answer: "②. 10年",
 explanation: "2017年の法改正以降、10年以上で受給可能になりました。",
 difficulty: "レベルA"
@@ -292,8 +406,14 @@ difficulty: "レベルC"
 },
 {
 question: "「任意加入被保険者」となることができる人は？",
-choices: ["①. 30歳の会社員", "②. 40歳の公務員", "③. 60歳以上65歳未満で未納期間がある人", "④. 学生", "⑤. 20歳未満の未加入者"],
-answer: "", "③. 60歳以上65歳未満で未納期間がある人",
+choices: [
+"①. 30歳の会社員",
+"②. 40歳の公務員",
+"③. 60歳以上65歳未満で未納期間がある人",
+"④. 学生",
+"⑤. 20歳未満の未加入者"
+],
+answer: "③. 60歳以上65歳未満で未納期間がある人",
 explanation: "任意加入は、保険料納付を満たすために利用されます。",
 difficulty: "レベルB"
 },
@@ -341,7 +461,13 @@ difficulty: "レベルC"
 },
 {
 question: "「死亡一時金」の支給対象外は？",
-choices: ["①. 保険料未納者", "②. 配偶者に子がいる", "③. 寡婦年金受給者", "④. 未支給年金がある遺族", "⑤. 支給要件を満たさない遺族"],
+choices: [
+"①. 保険料未納者",
+"②. 配偶者に子がいる",
+"③. 寡婦年金受給者",
+"④. 未支給年金がある遺族",
+"⑤. 支給要件を満たさない遺族"
+],
 answer: "②. 配偶者に子がいる",
 explanation: "子がいると遺族基礎年金が優先され、一時金は対象外になります。",
 difficulty: "レベルB"
@@ -376,124 +502,86 @@ difficulty: "レベルC"
 }
 ];
 
-let currentQuestion = 0;
-let score = 0;
-let mistakeLog = [];
-let answered = false;
 
-function showQuestion() {
-const q = quizData[currentQuestion];
-document.getElementById("question").textContent = q.question;
-document.getElementById("difficulty").textContent = `難易度：${q.difficulty}`;
-const choicesDiv = document.getElementById("choices");
-choicesDiv.innerHTML = "";
+let current = 0;
+let score = 0;
+const history = [];
+
+const questionEl = document.getElementById("question");
+const choicesEl = document.getElementById("choices");
+const explanationEl = document.getElementById("explanation");
+const resultEl = document.getElementById("result");
+const nextBtn = document.getElementById("nextButton");
+const difficultyEl = document.getElementById("difficulty");
+
+function loadQuestion() {
+const q = quizData[current];
+questionEl.textContent = q.question;
+difficultyEl.textContent = `難易度: ${q.difficulty}`;
+explanationEl.textContent = "";
+choicesEl.innerHTML = "";
+nextBtn.style.display = "none";
 
 q.choices.forEach(choice => {
 const btn = document.createElement("button");
+btn.className = "choice";
 btn.textContent = choice;
-btn.onclick = () => checkAnswer(choice);
-btn.disabled = false;
-choicesDiv.appendChild(btn);
+btn.onclick = () => selectAnswer(choice);
+choicesEl.appendChild(btn);
 });
-
-document.getElementById("result").textContent = "";
-document.getElementById("nextBtn").style.display = "none";
-answered = false;
 }
 
-function checkAnswer(userAnswer) {
-if (answered) return;
-answered = true;
-
-const q = quizData[currentQuestion];
-const resultDiv = document.getElementById("result");
-resultDiv.innerHTML = "";
-
-if (userAnswer === q.answer) {
-resultDiv.innerHTML = `<span style="color:green;">正解！</span>`;
+function selectAnswer(choice) {
+const q = quizData[current];
+const isCorrect = choice === q.answer;
+if (isCorrect) {
 score++;
+explanationEl.textContent = "✅ 正解！ " + q.explanation;
 } else {
-resultDiv.innerHTML = `<span style="color:red;">不正解… 正解は「${q.answer}」</span>`;
-mistakeLog.push({
-question: q.question,
-selected: userAnswer,
-correct: q.answer,
-difficulty: q.difficulty
-});
+explanationEl.textContent = "❌ 不正解… " + q.explanation + `（正解は ${q.answer}）`;
 }
 
-const explanationDiv = document.createElement("div");
-explanationDiv.className = "explanation";
-explanationDiv.innerHTML = `
-難易度：${q.difficulty}<br>
-解説：${q.explanation}
-`;
-resultDiv.appendChild(explanationDiv);
-
-document.getElementById("nextBtn").style.display = "inline-block";
-Array.from(document.getElementById("choices").children).forEach(btn => btn.disabled = true);
-}
-
-function nextQuestion() {
-currentQuestion++;
-if (currentQuestion < quizData.length) {
-showQuestion();
-} else {
-showScore();
-}
-}
-
-function showScore() {
-document.getElementById("quiz-container").style.display = "none";
-const scoreDiv = document.getElementById("score");
-scoreDiv.style.display = "block";
-scoreDiv.innerHTML = `あなたの点数は ${score} / ${quizData.length} 点です！`;
-
-const history = JSON.parse(localStorage.getItem("quizHistory") || "[]");
-const today = new Date().toLocaleDateString();
 history.push({
-date: today,
-score: `${score}/${quizData.length}`,
-mistakes: mistakeLog
+question: q.question,
+selected: choice,
+correct: q.answer,
+result: isCorrect ? "○" : "×"
 });
-localStorage.setItem("quizHistory", JSON.stringify(history));
 
-showHistory();
+Array.from(choicesEl.children).forEach(btn => {
+btn.disabled = true;
+if (btn.textContent === q.answer) {
+btn.style.backgroundColor = "#c8e6c9";
+} else if (btn.textContent === choice) {
+btn.style.backgroundColor = "#ffcdd2";
+}
+});
+
+nextBtn.style.display = "inline-block";
 }
 
-function showHistory() {
-const historyData = JSON.parse(localStorage.getItem("quizHistory") || "[]");
-const historyDiv = document.getElementById("history");
-
-if (historyData.length === 0) return;
-
-historyDiv.innerHTML = "<h3>過去のスコア履歴</h3>";
-historyData.slice(-5).reverse().forEach((record) => {
-const div = document.createElement("div");
-div.innerHTML = `<strong>${record.date}：</strong>${record.score}`;
-
-if (record.mistakes.length > 0) {
-const ul = document.createElement("ul");
-record.mistakes.forEach(m => {
-const li = document.createElement("li");
-li.innerHTML = `
-<strong>Q:</strong> ${m.question}<br>
-難易度: ${m.difficulty}<br>
-あなたの答え: <em>${m.selected}</em><br>
-正解: <strong>${m.correct}</strong>
-`;
-ul.appendChild(li);
-});
-div.appendChild(ul);
+nextBtn.onclick = () => {
+current++;
+if (current < quizData.length) {
+loadQuestion();
 } else {
-div.innerHTML += "<p>全問正解🎉</p>";
+showResult();
 }
+};
 
-historyDiv.appendChild(div);
+function showResult() {
+document.getElementById("quiz").style.display = "none";
+resultEl.style.display = "block";
+let html = `<h2>結果：${score} / ${quizData.length} 点</h2>`;
+html += `<h3>履歴</h3><ul>`;
+history.forEach(h => {
+html += `<li>${h.result} ${h.question}<br>　選択: ${h.selected}<br>　正解: ${h.correct}</li>`;
 });
+html += "</ul>";
+resultEl.innerHTML = html;
 }
 
-showQuestion();
+loadQuestion();
 </script>
 </body>
 </html>
